@@ -9,6 +9,9 @@ import overpass
 def _build_query(area):
   return f'''area[name="{area}"] -> .searchArea; node["amenity"="school"](area.searchArea)'''
 
+def _build_query_specialized_educ(area):
+  return f'''area[name="{area}"] -> .searchArea; node["specialized_education" = "special_needs"](area.searchArea)'''
+
 def _downloader(overpass_query):
   api = overpass.API(timeout=600)
   response = api.get(overpass_query, verbosity='geom')
@@ -54,12 +57,13 @@ def transform_to_simplified_json(province_path="data/philippines-json-maps/geojs
   print("creating provinces and cities index")
   _create_json(geo_list, output_path)
 
-def download_nodes(province_path="data/provinces.json", output="output"):
+def download_nodes(province_path="data/provinces.json", output="output", query_type="base"):
   provinces = _read_json(province_path)
   os.makedirs("output", exist_ok=True)
   for province in provinces:
     output_file = f'{output}/{province["region"]}-{province["province"]}.geojson'
-    query = _build_query(province["province"])
+    if query_type == "base": query = _build_query(province["province"])
+    else: query = _build_query_specialized_educ(province["province"])
     print(f"running query: ", query)
     data = _downloader(query)
     _create_json(data, output_file)
@@ -71,6 +75,8 @@ if __name__ == "__main__":
     transform_to_simplified_json()
   elif sys.argv[1] == "download-nodes":
     download_nodes()
+  elif sys.argv[1] == "download-specialized-education-nodes":
+    download_nodes(query_type="specialized-education")
   else:
     print("module not yet created")
     raise SystemExit(2)
