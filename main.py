@@ -1,9 +1,8 @@
 #!env/bin/python3
-
-import csv
 import json
 import os
 import sys
+import time
 import overpass
 
 
@@ -19,11 +18,10 @@ def _create_json(data, output="output/test.geojson"):
   with open(output, "w") as output_json:
     json.dump(data, output_json)
 
-def _read_csv(province="data/province.csv"):
-  with open(province, "r") as prov_csv:
-    provinces = csv.reader(prov_csv)
-    next(provinces)
-    return provinces
+def _read_json(prov_json):
+  with open(prov_json, "r") as provjson:
+    prov_data = json.load(provjson)
+  return prov_data
 
 def _transform_to_province_json(json_file, region="1"):
   """
@@ -47,41 +45,33 @@ def _build_provinces(province_path):
     for f in files:
       file_path = os.path.join(root, f)
       region = f.split("-")[2].split(".")[0].split("ph")[1][0:2]
-      if region == "13": continue # skip NCR since it doesn't use provinces convention
+      if region == "13": province_list += [{"province": "Metro Manila", "region": "National Capital Region"}]
       else: province_list += _transform_to_province_json(file_path, region)
   return province_list
 
-def _build_cities(cities_path):
-  """
-  for NCR, using the municities dataset
-  """
-  ncr_list = []
-  files = ["municities-province-ph133900000.0.001.json","municities-province-ph137400000.0.001.json", "municities-province-ph137500000.0.001.json", "municities-province-ph137600000.0.001.json"]
-  for f in files:
-    file_path = os.path.join(cities_path, f)
-    ncr_list += _transform_to_province_json(file_path, "NCR")
-  return ncr_list
-
-def transform_to_simplified_json(province_path="data/philippines-json-maps/geojson/provinces/lowres", cities_path="data/philippines-json-maps/geojson/municties/lowres/", output_path="data/provinces.json"):
-  geo_list = _build_provinces(province_path) + _build_cities(cities_path)
+def transform_to_simplified_json(province_path="data/philippines-json-maps/geojson/provinces/lowres", output_path="data/provinces.json"):
+  geo_list = _build_provinces(province_path)
   print("creating provinces and cities index")
   _create_json(geo_list, output_path)
+
+def download_nodes(province_path="data/provinces.json", output="output"):
+  provinces = _read_json(province_path)
+  os.makedirs("output", exist_ok=True)
+  for province in provinces:
+    output_file = f'{output}/{province["region"]}-{province["province"]}.geojson'
+    query = _build_query(province["province"])
+    print(f"running query: ", query)
+    data = _downloader(query)
+    _create_json(data, output_file)
+    time.sleep(5)
+
 
 if __name__ == "__main__":
   if sys.argv[1] == "transform-to-simplified-json":
     transform_to_simplified_json()
+  elif sys.argv[1] == "download-nodes":
+    download_nodes()
   else:
     print("module not yet created")
     raise SystemExit(2)
-  # if (args_count := len(sys.argv)) > 2:
-  #   print(f"One argument expected, got {args_count - 1}")
-  #   raise SystemExit(2)
-  # elif args_count < 2:
-  #   print("You must specify the target directory")
-  #   raise SystemExit(2)
 
-  # province = "Manila" # this is only for test
-  # os.makedirs("output", exist_ok=True)
-  # query = _build_query(province)
-  # data = _downloader(query)
-  # _create_json(data, f"output/{province}.geojson")
