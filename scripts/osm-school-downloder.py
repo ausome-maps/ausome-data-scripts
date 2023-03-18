@@ -9,12 +9,13 @@ import overpass
 def _build_query(area):
   return f'''area[name="{area}"] -> .searchArea; node["amenity"="school"](area.searchArea)'''
 
-def _build_query_specialized_educ(area):
-  return f'''area[name="{area}"] -> .searchArea; node["specialized_education" = "special_needs"](area.searchArea)'''
+def _build_query_specialized_educ(area, geo_type="node"):
+  return f'''area[name="{area}"] -> .searchArea; {geo_type}["specialized_education" = "special_needs"](area.searchArea)'''
 
 def _downloader(overpass_query):
   api = overpass.API(timeout=600)
-  response = api.get(overpass_query, verbosity='geom')
+  try: response = api.get(overpass_query, verbosity='geom')
+  except: response = {"features": []}
   return response
 
 def _create_json(data, output="../output/test.geojson"):
@@ -63,10 +64,10 @@ def download_nodes(province_path="data/provinces.json", output="output", query_t
   for province in provinces:
     output_file = f'{output}/{province["region"]}-{province["province"]}.geojson'
     if query_type == "base": query = _build_query(province["province"])
-    else: query = _build_query_specialized_educ(province["province"])
+    else: query = _build_query_specialized_educ(province["province"], "relation")
     print(f"running query: ", query)
     data = _downloader(query)
-    _create_json(data, output_file)
+    if len(data["features"]) > 0: _create_json(data, output_file)
     time.sleep(5)
 
 
