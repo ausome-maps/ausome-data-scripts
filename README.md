@@ -26,3 +26,8 @@ This uses Overpass Turbo API to download the `amenity=school` from OSM. This wil
    ```
    ./scripts/osm-school-downloader.py download-nodes
    ```
+
+## How to Contribute?
+- Add your script under the `scripts` directory.
+- Update the `requirements.txt` for any new python dependency.
+- Update the `README.md` to add the usage of your code.
