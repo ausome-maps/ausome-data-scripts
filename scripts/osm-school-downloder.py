@@ -14,7 +14,7 @@ def _downloader(overpass_query):
   response = api.get(overpass_query, verbosity='geom')
   return response
 
-def _create_json(data, output="output/test.geojson"):
+def _create_json(data, output="../output/test.geojson"):
   with open(output, "w") as output_json:
     json.dump(data, output_json)
 

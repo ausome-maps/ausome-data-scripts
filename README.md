@@ -1,9 +1,10 @@
-# PH School OSM Downloader
-The following repository will download PH schools from OSM. This will produce a GeoJSON file which is named after the province where the school is located.
+# Ausome Data Scripts
+This repository contains the data scripts of ausome maps to work with OSM datasets.
 
 
 ## Requirements
 - Overpass
+- Python 3.8+
 
 ## Setup
 1. Setup a virtual environment: `python3 -m venv env`
@@ -12,9 +13,16 @@ The following repository will download PH schools from OSM. This will produce a 
 ## Datasets
 - [Province List](https://github.com/faeldon/philippines-json-maps)
 
-## Usage
-- **transform-to-simplified-json:** creates a provinces JSON which contains the provinces and NCR cities into one. 
-    ```
-    ./main.py transform-to-simplified-json
-    ```
+## Scripts
+This folder contains some of the scripts used by ausome maps to work with OSM data.
 
+### OSM School Downloader
+This uses Overpass Turbo API to download the `amenity=school` from OSM. This will produce an output folder containing the GeoJSON files of the downloaded nodes.
+- **transform-to-simplified-json:** creates a provinces JSON which contains the provinces and NCR cities into one. _There is already a `province.json` which the download-nodes use._
+    ```
+    ./scripts/osm-school-downloader.py transform-to-simplified-json
+    ```
+- **download-nodes:** triggers the OSM download and stores it into a GeoJSON format.
+   ```
+   ./scripts/osm-school-downloader.py download-nodes
+   ```
