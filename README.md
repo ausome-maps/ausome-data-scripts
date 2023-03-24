@@ -21,7 +21,7 @@ This folder contains some of the scripts used by ausome maps to work with OSM da
     ```
     ./scripts/osm-school-downloader.py transform-to-simplified-json
     ```
-- **download-nodes:** this uses Overpass Turbo API to download the `amenity=school` from OSM. This will produce an output folder containing the GeoJSON files of the downloaded nodes..
+- **download-nodes:** this uses Overpass Turbo API to download the `amenity=school` from OSM. This will produce an output folder containing the GeoJSON files of the downloaded nodes.
    ```
    ./scripts/osm-school-downloader.py download-nodes
    ```
